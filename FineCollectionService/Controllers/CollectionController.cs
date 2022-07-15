@@ -1,4 +1,6 @@
-﻿namespace FineCollectionService.Controllers;
+﻿using System.Text.Json;
+
+namespace FineCollectionService.Controllers;
 
 [ApiController]
 [Route("")]
@@ -10,7 +12,8 @@ public class CollectionController : ControllerBase
     private readonly VehicleRegistrationService _vehicleRegistrationService;
 
     public CollectionController(IConfiguration config, ILogger<CollectionController> logger,
-        IFineCalculator fineCalculator, VehicleRegistrationService vehicleRegistrationService)
+        IFineCalculator fineCalculator, VehicleRegistrationService vehicleRegistrationService,
+        DaprClient daprClient)
     {
         _logger = logger;
         _fineCalculator = fineCalculator;
@@ -19,14 +22,33 @@ public class CollectionController : ControllerBase
         // set finecalculator component license-key
         if (_fineCalculatorLicenseKey == null)
         {
-            _fineCalculatorLicenseKey = config.GetValue<string>("fineCalculatorLicenseKey");
+            //_fineCalculatorLicenseKey = config.GetValue<string>("fineCalculatorLicenseKey");
+            var secrets = daprClient.GetSecretAsync("trafficcontrol-secrets", "finecalculator.licensekey").Result;
+            _fineCalculatorLicenseKey = secrets["finecalculator.licensekey"];
         }
     }
 
+    [Topic("pubsub", "speedingviolations")]
     [Route("collectfine")]
     [HttpPost()]
-    public async Task<ActionResult> CollectFine(SpeedingViolation speedingViolation)
+    //public async Task<ActionResult> CollectFine(SpeedingViolation speedingViolation)
+    public async Task<ActionResult> CollectFine(
+        SpeedingViolation speedingViolation,
+        /*[FromBody] JsonDocument cloudevent*/
+        [FromServices] DaprClient daprClient)
     {
+        // manual parsing of cloudevent
+        /*
+        var data = cloudevent.RootElement.GetProperty("data");
+        var speedingViolation = new SpeedingViolation
+        {
+            VehicleId = data.GetProperty("vehicleId").GetString()!,
+            RoadId = data.GetProperty("roadId").GetString()!,
+            Timestamp = data.GetProperty("timestamp").GetDateTime()!,
+            ViolationInKmh = data.GetProperty("violationInKmh").GetInt32()
+        };
+        */
+
         decimal fine = _fineCalculator.CalculateFine(_fineCalculatorLicenseKey!, speedingViolation.ViolationInKmh);
 
         // get owner info
@@ -42,8 +64,37 @@ public class CollectionController : ControllerBase
             $"at {speedingViolation.Timestamp.ToString("hh:mm:ss")}.");
 
         // send fine by email
-        // TODO
+        var body = EmailUtils.CreateEmailBody(speedingViolation, vehicleInfo, fineString);
+        var metadata = new Dictionary<string, string>
+        {
+            ["emailFrom"] = "noreply@cfca.gov",
+            ["emailTo"] = vehicleInfo.OwnerEmail,
+            ["subject"] = $"Speeding violation on the {speedingViolation.RoadId}"
+        };
+
+        // send email via output binding
+        await daprClient.InvokeBindingAsync("sendmail", "create", body, metadata);
+
 
         return Ok();
     }
+
+
+    // Manually create dapr/subscribe endpoint
+    /*
+    [Route("/dapr/subscribe")]
+    [HttpGet()]
+    public object Subscribe()
+    {
+        return new object[]
+        {
+            new
+            {
+                pubsubname = "pubsub",
+                topic = "speedingviolations",
+                route = "/collectfine"
+            }
+        };
+    }
+    */
 }

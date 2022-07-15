@@ -8,4 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MQTTNet" Version="4.0.2.221" />
+  </ItemGroup>
+
 </Project>

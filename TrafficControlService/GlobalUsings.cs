@@ -4,3 +4,5 @@ global using TrafficControlService.Models;
 global using TrafficControlService.Events;
 global using Microsoft.AspNetCore.Mvc;
 global using System.Collections.Concurrent;
+global using Dapr.Client;
+global using Dapr;
