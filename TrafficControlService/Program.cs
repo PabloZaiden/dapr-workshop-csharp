@@ -6,9 +6,7 @@ builder.Services.AddSingleton<ISpeedingViolationCalculator>(
 builder.Services.AddHttpClient();
 //builder.Services.AddSingleton<IVehicleStateRepository, InMemoryVehicleStateRepository>();
 builder.Services.AddSingleton<IVehicleStateRepository, DaprVehicleStateRepository>();
-builder.Services.AddDaprClient(builder => builder
-    .UseHttpEndpoint("http://localhost:3600")
-    .UseGrpcEndpoint("http://localhost:60000"));
+builder.Services.AddDaprClient();
 
 builder.Services.AddControllers();
 

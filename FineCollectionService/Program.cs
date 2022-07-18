@@ -3,9 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IFineCalculator, HardCodedFineCalculator>();
 
-builder.Services.AddDaprClient(builder => builder
-    .UseHttpEndpoint("http://localhost:3601")
-    .UseGrpcEndpoint("http://localhost:60001"));
+builder.Services.AddDaprClient();
 
 // DI needed for VehicleRegistrationService
 //builder.Services.AddHttpClient();
@@ -13,7 +11,7 @@ builder.Services.AddDaprClient(builder => builder
 
 // DI needed for VehicleRegistrationService (using Dapr)
 builder.Services.AddSingleton<VehicleRegistrationService>(_ => 
-    new VehicleRegistrationService(DaprClient.CreateInvokeHttpClient("vehicleregistrationservice", "http://localhost:3601")));
+    new VehicleRegistrationService(DaprClient.CreateInvokeHttpClient("vehicleregistrationservice")));
 
 var mvcBuilder = builder.Services.AddControllers();
 
