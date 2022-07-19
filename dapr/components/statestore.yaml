@@ -2,12 +2,13 @@ apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: statestore
+  #namespace: dapr-workshop
 spec:
   type: state.redis
   version: v1
   metadata:
   - name: redisHost
-    value: localhost:6379
+    value: externalinfrastructure:6379
   - name: redisPassword
     value: ""
   - name: actorStateStore

@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: finecollectionservice
+  labels:
+    app: finecollectionservice
+spec:
+  selector:
+    app: finecollectionservice
+  ports:
+  - protocol: TCP
+    port: 6001
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finecollectionservice
+  labels:
+    app: finecollectionservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finecollectionservice
+  template:
+    metadata:
+      labels:
+        app: finecollectionservice
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "finecollectionservice"
+        dapr.io/app-port: "6001"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+      - name: finecollectionservice
+        image: k3d-dapr-workshop-registry:20444/finecollectionservice
+        ports:
+        - containerPort: 6001
+        imagePullPolicy: Always

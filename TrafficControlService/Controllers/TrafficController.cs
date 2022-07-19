@@ -42,8 +42,9 @@ public class TrafficController : ControllerBase
 
             return Ok();
         }
-        catch
+        catch(Exception ex)
         {
+            _logger.LogError(ex, "Error while handling vehicle entry.");
             return StatusCode(500);
         }
     }
@@ -100,8 +101,9 @@ public class TrafficController : ControllerBase
 
             return Ok();
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error while handling vehicle exit.");
             return StatusCode(500);
         }
     }

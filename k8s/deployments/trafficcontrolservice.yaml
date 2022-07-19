@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: trafficcontrolservice
+  labels:
+    app: trafficcontrolservice
+spec:
+  selector:
+    app: trafficcontrolservice
+  ports:
+  - protocol: TCP
+    port: 6000
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trafficcontrolservice
+  labels:
+    app: trafficcontrolservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trafficcontrolservice
+  template:
+    metadata:
+      labels:
+        app: trafficcontrolservice
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "trafficcontrolservice"
+        dapr.io/app-port: "6000"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+      - name: trafficcontrolservice
+        image: k3d-dapr-workshop-registry:20444/trafficcontrolservice
+        ports:
+        - containerPort: 6000
+        imagePullPolicy: Always

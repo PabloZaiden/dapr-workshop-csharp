@@ -1,0 +1,82 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: externalinfrastructure
+  labels:
+    app: externalinfrastructure
+spec:
+  selector:
+    app: externalinfrastructure
+  ports:
+  - protocol: TCP
+    port: 4025
+    targetPort: 1025
+    name: mailsmtp
+  - protocol: TCP
+    port: 4000
+    targetPort: 1080
+    name: mailweb
+  - protocol: TCP
+    port: 1883
+    name: mqtt
+  - protocol: TCP
+    port: 9001
+    name: mqtt-admin
+  - protocol: TCP
+    port: 5672
+    name: rabbitmq
+  - protocol: TCP
+    port: 15672
+    name: rabbitmq-admin
+  - protocol: TCP
+    port: 6379
+    name: redis
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: externalinfrastructure
+  labels:
+    app: externalinfrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: externalinfrastructure
+  template:
+    metadata:
+      labels:
+        app: externalinfrastructure
+    spec:
+      containers:
+      - name: maildev
+        image: maildev/maildev:2.0.5
+        ports:
+        - containerPort: 1025
+          name: mailsmtp
+        - containerPort: 1080
+          name: mailweb
+        imagePullPolicy: Always
+      - name: mosquitto
+        image: k3d-dapr-workshop-registry:20444/dapr-trafficcontrol/mosquitto:1.0
+        ports:
+        - containerPort: 1883
+          name: mqtt
+        - containerPort: 9001
+          name: mqtt-admin
+        imagePullPolicy: Always
+      - name: rabbitmq
+        image: rabbitmq:3-management-alpine
+        ports:
+        - containerPort: 5672
+          name: rabbitmq
+        - containerPort: 15672
+          name: rabbitmq-admin
+        imagePullPolicy: Always
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        imagePullPolicy: Always

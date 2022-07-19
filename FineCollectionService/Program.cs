@@ -13,10 +13,7 @@ builder.Services.AddDaprClient();
 builder.Services.AddSingleton<VehicleRegistrationService>(_ => 
     new VehicleRegistrationService(DaprClient.CreateInvokeHttpClient("vehicleregistrationservice")));
 
-var mvcBuilder = builder.Services.AddControllers();
-
-// add dapr integration in mvc controllers
-mvcBuilder.AddDapr();
+var mvcBuilder = builder.Services.AddControllers().AddDapr();
 
 var app = builder.Build();
 

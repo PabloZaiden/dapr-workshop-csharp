@@ -2,25 +2,26 @@ apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
   name: sendmail
+  #namespace: dapr-workshop
 spec:
   type: bindings.smtp
   version: v1
   metadata:
   - name: host
-    value: localhost
+    value: externalinfrastructure
   - name: port
     value: 4025
   - name: user
     secretKeyRef:
-      name: smtp.user
-      key: smtp.user
+      name: smtp
+      key: user
   - name: password
     secretKeyRef:
-      name: smtp.password
-      key: smtp.password
+      name: smtp
+      key: password
   - name: skipTLSVerify
     value: true
 auth:
-  secretStore: trafficcontrol-secrets
+  secretStore: dapr-workshop-secrets
 scopes:
   - finecollectionservice

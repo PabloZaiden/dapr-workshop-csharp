@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: vehicleregistrationservice
+  labels:
+    app: vehicleregistrationservice
+spec:
+  selector:
+    app: vehicleregistrationservice
+  ports:
+  - protocol: TCP
+    port: 6002
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicleregistrationservice
+  labels:
+    app: vehicleregistrationservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vehicleregistrationservice
+  template:
+    metadata:
+      labels:
+        app: vehicleregistrationservice
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "vehicleregistrationservice"
+        dapr.io/app-port: "6002"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+      - name: vehicleregistrationservice
+        image: k3d-dapr-workshop-registry:20444/vehicleregistrationservice
+        ports:
+        - containerPort: 6002
+        imagePullPolicy: Always

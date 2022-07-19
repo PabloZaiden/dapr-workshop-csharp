@@ -23,8 +23,8 @@ public class CollectionController : ControllerBase
         if (_fineCalculatorLicenseKey == null)
         {
             //_fineCalculatorLicenseKey = config.GetValue<string>("fineCalculatorLicenseKey");
-            var secrets = daprClient.GetSecretAsync("trafficcontrol-secrets", "finecalculator.licensekey").Result;
-            _fineCalculatorLicenseKey = secrets["finecalculator.licensekey"];
+            var secrets = daprClient.GetSecretAsync("dapr-workshop-secrets", "finecalculator").Result;
+            _fineCalculatorLicenseKey = secrets["licensekey"];
         }
     }
 
@@ -48,6 +48,7 @@ public class CollectionController : ControllerBase
             ViolationInKmh = data.GetProperty("violationInKmh").GetInt32()
         };
         */
+        _logger.LogInformation("Processing speeding violation message");
 
         decimal fine = _fineCalculator.CalculateFine(_fineCalculatorLicenseKey!, speedingViolation.ViolationInKmh);
 
@@ -86,6 +87,7 @@ public class CollectionController : ControllerBase
     [HttpGet()]
     public object Subscribe()
     {
+        _logger.LogInformation("Received subscribe request");
         return new object[]
         {
             new
