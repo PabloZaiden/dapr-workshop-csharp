@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 
+dapr init -k
+
 source ./kenv.sh
 
 (cd .. && ./docker-build.sh)
@@ -46,7 +48,7 @@ deployApp ExternalInfrastructure
 deployApp VehicleRegistrationService
 deployApp FineCollectionService
 deployApp TrafficControlService
-deployApp SecretsRBAC
+#deployApp SecretsRBAC
 
 kd apply -f ../dapr/components/secrets-kubernetes.yaml
 kd apply -f ../dapr/components/email.yaml
